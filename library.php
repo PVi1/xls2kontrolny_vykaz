@@ -48,13 +48,13 @@ function openfile($path)
         $last_pcn = 0;
         for ($i=18;$i<=46;$i++) {
             //spocitam sumu za delenie
-            if (!strcasecmp(trim($worksheet->getCell('B'.$i)->getValue()), "delenie mat.")) {
+            if (stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delenie") !== false) {
                 $delenie += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
             }
             $new_pcn = trim($worksheet->getCell('C'.$i)->getValue());
-            if ($new_pcn == "" && !strcasecmp(trim($worksheet->getCell('B'.$i)->getValue()), "delenie mat.") && $last_pcn != 0) {
+            if ($new_pcn == "" && stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delenie") !== false && $last_pcn != 0) {
                 $totals[$last_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
-            } else {
+            } else if($new_pcn>0){
                 $totals[$new_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
                 $totals[$new_pcn]['mnozstvo'] += round($worksheet->getCell('S'.$i)->getOldCalculatedValue(), 2);
             }
@@ -62,14 +62,19 @@ function openfile($path)
         }
         echo "<br />Faktura: ".$faktura;
         echo "<br />Suma za delenie: ".$delenie;
-        echo "<br /><br />Statistiky:<br />";
-        foreach ($totals as $kat=>$val) {
-            if ($kat>0) {
-                echo 'Kategoria:'.$kat.'<br />';
-                echo 'Sum: '.$val['sum'].'<br />';
-                echo 'Mnozstvo: '.$val['mnozstvo'].'<br /><br />';
+        echo "<br /><br />Statistiky:<br />";        
+        if (count($totals)>0) {
+            foreach ($totals as $kat=>$val) {
+                if ($kat>0) {
+                    echo 'Kategoria:'.$kat.'<br />';
+                    echo 'Sum: '.$val['sum'].'<br />';
+                    echo 'Mnozstvo: '.$val['mnozstvo'].'<br /><br />';
+                }
             }
+        } else {
+            echo "V tejto fakture sa nenachadzaju ziadne polozky s PCN.";
         }
+
         echo '<hr><br />';
         return true;
     } catch (InvalidArgumentException $e) {
@@ -93,19 +98,21 @@ function extract_zip($fullpath)
 
 function process_fa($dir)
 {
-    if ($handle = opendir($dir)) {
-        while (false !== ($entry = readdir($handle))) {
-            $filetype = strtolower(pathinfo($dir.$entry, PATHINFO_EXTENSION));
-            // Check if image file is a actual image or fake image
-            if ($filetype == "xls") {
-                if (openfile($dir . $entry)) {
-                    if (is_file($dir . $entry)) {
-                        unlink($dir . $entry);
+    if ($files = scandir($dir)) {
+        if (sort($files)) {
+            foreach ($files as $file) {
+                if ($file != '.' && $file != '..') {
+                    $filetype = strtolower(pathinfo($dir.$file, PATHINFO_EXTENSION));
+                    if ($filetype == "xls") {
+                        if (openfile($dir . $file)) {
+                            if (is_file($dir . $file)) {
+                                unlink($dir . $file);
+                            }
+                        }
                     }
                 }
             }
+            return true;
         }
-        closedir($handle);
-        return true;
     }
 }
