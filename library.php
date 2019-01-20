@@ -62,7 +62,7 @@ function openfile($path)
         }
         echo "<br />Faktura: ".$faktura;
         echo "<br />Suma za delenie: ".$delenie;
-        echo "<br /><br />Statistiky:<br />";        
+        echo "<br /><br />Statistiky:<br />";
         if (count($totals)>0) {
             foreach ($totals as $kat=>$val) {
                 if ($kat>0) {
@@ -109,7 +109,11 @@ function process_fa($dir)
                                 unlink($dir . $file);
                             }
                         }
-                    }
+                    } else if (is_file($dir . $file)) {
+                        //zmazeme balast z archivu
+                          unlink($dir . $file);
+                      }
+
                 }
             }
             return true;
