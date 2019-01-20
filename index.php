@@ -22,6 +22,7 @@ if (isset($_POST["submit"])) {
                 if (is_file($target_file)) {
                     //delete archive at the end
                     unlink($target_file);
+                    echo "<br />HOTOVO, subory som bezpecne odstranil zo servera.<br />";
                 }
             }
         }
@@ -29,7 +30,7 @@ if (isset($_POST["submit"])) {
     } else {
         echo "Pokusili ste sa nahrat nepovoleny typ suboru. Nahravajte len ZIP archiv.";
     }
-  
+
 } else {
     ?>
 <form action="index.php" method="post" enctype="multipart/form-data">
