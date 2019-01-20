@@ -51,19 +51,19 @@ function openfile($path){
         $last_pcn = 0;
         for($i=18;$i<=46;$i++){
           //spocitam sumu za delenie
-          if(trim($worksheet->getCell('B'.$i)->getValue())=="delenie mat."){
-            $delenie += number_format($worksheet->getCell('T'.$i)->getOldCalculatedValue(),2);
+          if(!strcasecmp(trim($worksheet->getCell('B'.$i)->getValue()),"delenie mat.")){
+            $delenie += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(),2);
           }
             $new_pcn = trim($worksheet->getCell('C'.$i)->getValue());
-            if($new_pcn == "" && trim($worksheet->getCell('B'.$i)->getValue())=="delenie mat." && $last_pcn != 0){
-              $totals[$last_pcn]['sum'] += number_format($worksheet->getCell('T'.$i)->getOldCalculatedValue(),2);
+            if($new_pcn == "" && !strcasecmp(trim($worksheet->getCell('B'.$i)->getValue()),"delenie mat.") && $last_pcn != 0){
+              $totals[$last_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(),2);
             }
             else {
-              $totals[$new_pcn]['sum'] += number_format($worksheet->getCell('T'.$i)->getOldCalculatedValue(),2);
-              $totals[$new_pcn]['mnozstvo'] += number_format($worksheet->getCell('S'.$i)->getOldCalculatedValue(),2);
+              $totals[$new_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(),2);
+              $totals[$new_pcn]['mnozstvo'] += round($worksheet->getCell('S'.$i)->getOldCalculatedValue(),2);
             }
             $last_pcn = trim($worksheet->getCell('C'.$i)->getValue());
-        
+
         }
         echo "<br />Faktura: ".$faktura;
         echo "<br />Suma za delenie: ".$delenie;
@@ -72,9 +72,10 @@ function openfile($path){
           if($kat>0){
             echo 'Kategoria:'.$kat.'<br />';
             echo 'Sum: '.$val['sum'].'<br />';
-            echo 'Mnozstvo: '.$val['mnozstvo'].'<br />';
+            echo 'Mnozstvo: '.$val['mnozstvo'].'<br /><br />';
           }
         }
+        echo '<hr><br />';
 
     } catch (InvalidArgumentException $e) {
 
