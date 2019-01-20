@@ -82,3 +82,15 @@ function openfile($path){
         echo('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME) . '": ' . $e->getMessage());
     }
 }
+
+function process_zip($fullpath){
+
+  $zip = new ZipArchive;
+  if ($zip->open($fullpath) === TRUE) {
+      $zip->extractTo('input/');
+      $zip->close();
+      echo 'ok';
+  } else {
+      echo 'failed';
+  }
+}
