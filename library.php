@@ -40,18 +40,26 @@ function openfile($path)
         $worksheet = $spreadsheet->getActiveSheet();
 
         $faktura = $spreadsheet->getActiveSheet()->getCell('D8')->getValue();
-
+        $dph = $worksheet->getCell('O50')->getOldCalculatedValue();
+        if(is_numeric($dph)){
+          echo 'Preskakujem '.$faktura.', keďže je DPH nenulove: '.$dph.'.<br />';
+          return true;
+        }
 
         //1. suma Delenie mat.  celej faktury
         $delenie = 0;
         $totals = array();
         $last_pcn = 0;
+        $control_amount_total = round($worksheet->getCell('O51')->getOldCalculatedValue(), 2);
+
         for ($i=18;$i<=46;$i++) {
             //spocitam sumu za delenie
-            if (stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delenie") !== false) {
+            $new_pcn = trim($worksheet->getCell('C'.$i)->getValue());
+
+            if (stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delenie") !== false && $new_pcn=="") {
                 $delenie += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
             }
-            $new_pcn = trim($worksheet->getCell('C'.$i)->getValue());
+
             if ($new_pcn == "" && stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delenie") !== false && $last_pcn != 0) {
                 $totals[$last_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
             } else if($new_pcn>0){
@@ -59,20 +67,28 @@ function openfile($path)
                 $totals[$new_pcn]['mnozstvo'] += round($worksheet->getCell('S'.$i)->getOldCalculatedValue(), 2);
             }
             $last_pcn = trim($worksheet->getCell('C'.$i)->getValue());
+            $amount_total += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
         }
-        echo "<br />Faktura: ".$faktura;
-        echo "<br />Suma za delenie: ".$delenie;
-        echo "<br /><br />Statistiky:<br />";
-        if (count($totals)>0) {
-            foreach ($totals as $kat=>$val) {
-                if ($kat>0) {
-                    echo 'Kategoria:'.$kat.'<br />';
-                    echo 'Sum: '.$val['sum'].'<br />';
-                    echo 'Mnozstvo: '.$val['mnozstvo'].'<br /><br />';
-                }
-            }
-        } else {
-            echo "V tejto fakture sa nenachadzaju ziadne polozky s PCN.";
+
+        if(abs($control_amount_total - $amount_total) > 0.04){
+          echo "Detekovaná pravdepodobná chyba na faktúre, rozdiel faktúrovanej sumy {$control_amount_total} a súčtu položiek {$amount_total} je: ".($control_amount_total - $amount_total).".<br />";
+        }
+        else {
+
+          echo "<br />Faktura: ".$faktura;
+          echo "<br />Suma za delenie: ".$delenie;
+          echo "<br /><br />Statistiky:<br />";
+          if (count($totals)>0) {
+              foreach ($totals as $kat=>$val) {
+                  if ($kat>0) {
+                      echo 'Kategoria:'.$kat.'<br />';
+                      echo 'Sum: '.$val['sum'].'<br />';
+                      echo 'Mnozstvo: '.$val['mnozstvo'].'<br /><br />';
+                  }
+              }
+          } else {
+              echo "V tejto fakture sa nenachadzaju ziadne polozky s PCN.";
+          }
         }
 
         echo '<hr><br />';
