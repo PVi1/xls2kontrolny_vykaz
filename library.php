@@ -13,6 +13,8 @@ class MyReadFilter implements IReadFilter
     {
         if ($row == 8 and $column == 'D') {
             return true;
+        }else if ($row == 18 && $column == 'C'){
+            return true;
         }else if (($row == 49 || $row == 50) && $column == 'O'){
           return true;
         }elseif ($row >= 19 && $row <= 46) {
@@ -39,6 +41,15 @@ function openfile($path)
         $reader->setReadFilter($filter);
         $spreadsheet = $reader->load($inputFileName);
         $worksheet = $spreadsheet->getActiveSheet();
+
+        //ocel alebo silon
+        $typ_vykazu = $worksheet->getCell('C18')->getValue();
+        if($typ_vykazu != "PCN"){
+          //dekrementuj -1 stlpec vsade
+          echo "Preskakujem, nejde o železo.<br />";
+          echo '<hr><br />';
+          return true;
+        }
 
         $faktura = $worksheet->getCell('D8')->getValue();
 
