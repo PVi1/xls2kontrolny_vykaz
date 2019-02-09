@@ -9,12 +9,13 @@ use PhpOffice\PhpSpreadsheet\Cell;
 class MyReadFilter implements IReadFilter
 {
     public $columns = ['B','C','N','S','T'];
-    public $columns_computed = ['S','T'];
     public function readCell($column, $row, $worksheetName = '')
     {
         if ($row == 8 and $column == 'D') {
             return true;
-        } elseif ($row >= 19 && $row <= 46) {
+        }else if (($row == 49 || $row == 50) && $column == 'O'){
+          return true;
+        }elseif ($row >= 19 && $row <= 46) {
             if (in_array($column, $this->columns)) {
                 return true;
             }
@@ -39,10 +40,12 @@ function openfile($path)
         $spreadsheet = $reader->load($inputFileName);
         $worksheet = $spreadsheet->getActiveSheet();
 
-        $faktura = $spreadsheet->getActiveSheet()->getCell('D8')->getValue();
+        $faktura = $worksheet->getCell('D8')->getValue();
+
         $dph = $worksheet->getCell('O50')->getOldCalculatedValue();
-        if(is_numeric($dph)){
-          echo 'Preskakujem '.$faktura.', keďže je DPH nenulove: '.$dph.'.<br />';
+        if(is_numeric($dph) && $dph>0){
+          echo 'Preskakujem '.$faktura.', keďže je DPH nenulové: '.$dph.'.<br />';
+          echo '<hr><br />';
           return true;
         }
 
@@ -50,7 +53,8 @@ function openfile($path)
         $delenie = 0;
         $totals = array();
         $last_pcn = 0;
-        $control_amount_total = round($worksheet->getCell('O51')->getOldCalculatedValue(), 2);
+        $control_amount_total = round($worksheet->getCell('O49')->getOldCalculatedValue(), 2);
+        //$control_amount_total = $worksheet->getCell('O49')->getOldCalculatedValue();
 
         for ($i=18;$i<=46;$i++) {
             //spocitam sumu za delenie
@@ -70,8 +74,8 @@ function openfile($path)
             $amount_total += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
         }
 
-        if(abs($control_amount_total - $amount_total) > 0.04){
-          echo "Detekovaná pravdepodobná chyba na faktúre, rozdiel faktúrovanej sumy {$control_amount_total} a súčtu položiek {$amount_total} je: ".($control_amount_total - $amount_total).".<br />";
+        if(abs($control_amount_total - $amount_total) > 0.1){
+          echo "Detekovaná pravdepodobná chyba na faktúre, rozdiel faktúrovanej sumy {$control_amount_total} a súčtu položiek {$amount_total} je: ".round(abs($control_amount_total - $amount_total),2)." €<br />";
         }
         else {
 
@@ -105,7 +109,7 @@ function extract_zip($fullpath)
     if ($zip->open($fullpath) === true) {
         $zip->extractTo('input/');
         $zip->close();
-        echo 'Subory boli uspesne extrahovane<br />';
+        echo 'Súbory boli úspešne extrahované<br /><br />';
         return true;
     } else {
         die('Cannot open file'.$fullpath.' Zip extract failed');
