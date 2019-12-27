@@ -71,11 +71,11 @@ function openfile($path)
             //spocitam sumu za delenie
             $new_pcn = trim($worksheet->getCell('C'.$i)->getValue());
 
-            if (stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delenie") !== false && $new_pcn=="") {
+            if (stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delen") !== false && $new_pcn=="") {
                 $delenie += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
             }
 
-            if ($new_pcn == "" && stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delenie") !== false && $last_pcn != 0) {
+            if ($new_pcn == "" && stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delen") !== false && $last_pcn != 0) {
                 $totals[$last_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
             } else if($new_pcn>0){
                 $totals[$new_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
