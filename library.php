@@ -20,6 +20,8 @@ class MyReadFilter implements IReadFilter
         }elseif ($row >= 19 && $row <= 46) {
             if (in_array($column, $this->columns)) {
                 return true;
+            }else {
+                return false;
             }
         } else {
             return false;
