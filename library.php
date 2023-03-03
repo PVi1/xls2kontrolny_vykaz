@@ -64,10 +64,11 @@ function openfile($path)
         $delenie = 0;
         $totals = array();
         $last_pcn = 0;
+        $amount_total = 0;
         $control_amount_total = round($worksheet->getCell('O49')->getOldCalculatedValue(), 2);
         //$control_amount_total = $worksheet->getCell('O49')->getOldCalculatedValue();
 
-        for ($i=18;$i<=46;$i++) {
+        for ($i=19;$i<=46;$i++) {
             //spocitam sumu za delenie
             $new_pcn = trim($worksheet->getCell('C'.$i)->getValue());
 
@@ -76,10 +77,20 @@ function openfile($path)
             }
 
             if ($new_pcn == "" && stripos(trim($worksheet->getCell('B'.$i)->getValue()), "delen") !== false && $last_pcn != 0) {
-                $totals[$last_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
-            } else if($new_pcn>0){
-                $totals[$new_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
-                $totals[$new_pcn]['mnozstvo'] += round($worksheet->getCell('S'.$i)->getOldCalculatedValue(), 2);
+                if(isset($totals[$last_pcn]['sum'] )){
+                    $totals[$last_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
+                }
+                else {
+                    $totals[$last_pcn]['sum'] = round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
+                }
+            } else if(is_numeric($new_pcn)){
+                    if(isset($totals[$new_pcn]['sum'] )){
+                        $totals[$new_pcn]['sum'] += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
+                        $totals[$new_pcn]['mnozstvo'] += round($worksheet->getCell('S'.$i)->getOldCalculatedValue(), 2);
+                    }else {
+                        $totals[$new_pcn]['sum'] = round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
+                        $totals[$new_pcn]['mnozstvo'] = round($worksheet->getCell('S'.$i)->getOldCalculatedValue(), 2);                    
+                    }
             }
             $last_pcn = trim($worksheet->getCell('C'.$i)->getValue());
             $amount_total += round($worksheet->getCell('T'.$i)->getOldCalculatedValue(), 2);
