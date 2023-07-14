@@ -110,6 +110,7 @@ function openfile($path)
               foreach ($totals as $kat=>$val) {
                   if ($kat>0) {
                       echo 'Kategoria:'.$kat.'<br />';
+                      echo 'Jedn. cena: '.round(($val['sum']/$val['mnozstvo']),4).'<br />';
                       echo 'Sum: '.$val['sum'].'<br />';
                       echo 'Mnozstvo: '.$val['mnozstvo'].'<br /><br />';
                   }
